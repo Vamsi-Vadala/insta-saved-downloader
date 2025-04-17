@@ -105,7 +105,7 @@ class InstagramDownloader:
         try:
             video_file, audio_file, output_file = f'./{title}.mp4', f'./{title}.mp3', f'./{title}_converted.mp4'
             if not os.path.exists(video_file) or not os.path.exists(audio_file):
-                return
+                raise FileNotFoundError(f"Missing files for {title}: {video_file}, {audio_file}")
             (
                 ffmpeg
                 .output(ffmpeg.input(video_file).video, ffmpeg.input(audio_file).audio, output_file, vcodec="copy", acodec="aac", loglevel="error")
