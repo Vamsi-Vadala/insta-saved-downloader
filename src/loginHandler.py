@@ -7,6 +7,9 @@ import pickle
 import os
 import bs4
 
+
+USER_NAME = 'vamsi._.vadala'
+
 class InstaLoginHandler:
 
     def __init__(self):
@@ -50,5 +53,8 @@ class InstaLoginHandler:
             f.write(bs4_obj.prettify("utf-8"))
             f.close()
         driver.quit()
+
+        return USER_NAME
+    
 if __name__ == "__main__":
     InstaLoginHandler().get_username()
