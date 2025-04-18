@@ -6,7 +6,7 @@ import shutil
 
 # CONFIGURATION
 BINARY_TYPE = "chromedriver"
-DOWNLOAD_DIR = ".\\drivers"
+DOWNLOAD_DIR = "../drivers"
 JSON_URL = "https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json"
 
 # Detect platform
