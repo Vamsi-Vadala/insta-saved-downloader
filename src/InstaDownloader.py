@@ -57,11 +57,11 @@ class InstagramDownloader:
     def download(self, url, video_only=False, audio_only=False):
         try:
             chrome_options = Options()
-            # chrome_options.add_argument("--headless=new")
+            chrome_options.add_argument("--headless=new")
             chrome_options.set_capability("goog:loggingPrefs", {"performance": "ALL"})
             
             driver = webdriver.Chrome(options=chrome_options,service=self.chrome_service)
-            driver.get('https://www.instagram.com')
+            driver.get(url.strip())
             for cookie in self.insta_cookies:
                 driver.add_cookie(cookie)
             driver.refresh()
@@ -73,27 +73,30 @@ class InstagramDownloader:
             
             # print(f'fetched logs successfully starting to Inspect the logd to extract urls......')
 
-            # TODO Delete the following lines
-            # Delete this ------------------------
             
-            # with open('logs.json','w') as f:
-            #     # print(f'Writing logs to logs.json file......')
-            #     json.dump(log_file, f, indent=4)
-            #     # print(f'Writing logs to logs.json file : Successful')
-            #     f.close()
-            # Delete this -------------------------
             video_urls = []
             log_file = [json.loads(log["message"]) for log in logs 
                         if "Network.requestWillBeSent" in json.loads(log["message"])["message"]["method"]]
             
             for log_message in log_file:
+
+            # # TODO Delete the following lines
+            # # Delete this ------------------------
+            
+            #     with open('logs.json','a+') as f:
+            #         # print(f'Writing logs to logs.json file......')
+            #         json.dump(log_message['message']['params'], f, indent=4)
+            #         # print(f'Writing logs to logs.json file : Successful')
+            #         f.close()
+            # # Delete this -------------------------
+
                 try:
                     url = log_message['message']['params']['request']['url']
                     if '.mp4' in url:
                         video_urls.append(url)
                 except:
                     continue
-
+            
             print(f' url extraction successfull. starting to download the videos from extracted urls......')
 
             if not video_urls:
