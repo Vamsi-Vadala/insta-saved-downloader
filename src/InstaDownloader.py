@@ -66,7 +66,7 @@ class InstagramDownloader:
                 driver.add_cookie(cookie)
             driver.refresh()
             driver.get(url.strip())
-            time.sleep(5)  # Wait for page load
+            time.sleep(3)  # Wait for page load
             
             logs = driver.get_log("performance")
             driver.quit()
