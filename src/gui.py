@@ -1,26 +1,38 @@
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import ttk, messagebox
 import threading
-from InstaDownloader import InstagramDownloader  # Assuming your class is in downloader.py
+from InstaDownloader import InstagramDownloader
 
 class InstaGUI:
     def __init__(self, master):
         self.master = master
         master.title("Instagram Video Downloader")
-        master.geometry("400x150")
+        master.geometry("450x180")
         master.resizable(False, False)
+        
+        style = ttk.Style()
+        style.configure("TButton", padding=6, font=('Helvetica', 10))
+        style.configure("TLabel", font=('Helvetica', 10))
+        style.configure("TEntry", padding=4, font=('Helvetica', 10))
 
-        self.label = tk.Label(master, text="Enter Instagram Post URL:")
-        self.label.pack(pady=(15, 5))
+        self.frame = ttk.Frame(master, padding="10 10 10 10")
+        self.frame.pack(expand=True, fill=tk.BOTH)
 
-        self.url_entry = tk.Entry(master, width=50)
-        self.url_entry.pack(pady=5)
+        self.label = ttk.Label(self.frame, text="Enter Instagram Post URL:")
+        self.label.grid(row=0, column=0, sticky=tk.W, pady=(5, 2))
 
-        self.download_button = tk.Button(master, text="Download", command=self.download_video)
-        self.download_button.pack(pady=(10, 5))
+        self.url_entry = ttk.Entry(self.frame, width=50)
+        self.url_entry.grid(row=1, column=0, columnspan=2, pady=(0, 10))
 
-        self.status_label = tk.Label(master, text="", fg="blue")
-        self.status_label.pack()
+        self.download_button = ttk.Button(self.frame, text="Download", command=self.download_video)
+        self.download_button.grid(row=2, column=0, columnspan=2, pady=(0, 10))
+
+        self.status_label = ttk.Label(self.frame, text="", foreground="blue")
+        self.status_label.grid(row=3, column=0, columnspan=2)
+
+        self.progress = ttk.Progressbar(self.frame, mode='indeterminate')
+        self.progress.grid(row=4, column=0, columnspan=2, sticky='ew', pady=(5, 0))
+        self.progress.grid_remove()
 
         self.downloader = InstagramDownloader()
 
@@ -30,17 +42,23 @@ class InstaGUI:
             messagebox.showwarning("Input Error", "Please enter a URL.")
             return
 
-        self.status_label.config(text="Downloading...")
+        self.status_label.config(text="Downloading...", foreground="blue")
+        self.progress.grid()
+        self.progress.start()
         threading.Thread(target=self.run_download, args=(url,), daemon=True).start()
 
     def run_download(self, url):
         try:
             self.downloader.download(url)
-            self.status_label.config(text="Download complete!", fg="green")
+            self.status_label.config(text="Download complete!", foreground="green")
+            self.url_entry.delete(0, tk.END)
         except Exception as e:
-            self.status_label.config(text=f"Error: {e}", fg="red")
+            self.status_label.config(text=f"Error: {e}", foreground="red")
+        finally:
+            self.progress.stop()
+            self.progress.grid_remove()
 
 if __name__ == "__main__":
     root = tk.Tk()
-    gui = InstaGUI(root)
+    app = InstaGUI(root)
     root.mainloop()

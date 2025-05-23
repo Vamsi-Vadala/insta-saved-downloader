@@ -3,37 +3,32 @@ import platform
 import requests
 import zipfile
 import shutil
+import subprocess
 
-# CONFIGURATION
 BINARY_TYPE = "chromedriver"
 DOWNLOAD_DIR = "../drivers"
 JSON_URL = "https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json"
 
-# Detect platform
-
 class WebdriverDownloader:
     def __init__(self):
-        self.platform_name = None
+        self.platform_name = self.detect_platform()
         self.driver_path = None
         self.current_version = None
+
+    def detect_platform(self):
         system = platform.system().lower()
         machine = platform.machine().lower()
-
         if system == "windows":
-            self.platform_name = "win64"
+            return "win64"
         elif system == "linux":
-            self.platform_name = "linux64"
+            return "linux64"
         elif system == "darwin":
-            if machine == "x86_64":
-                self.platform_name = "mac-x64"
-            elif "arm" in machine:
-                self.platform_name = "mac-arm64"
-        # raise Exception("Unsupported platform")
+            return "mac-arm64" if "arm" in machine else "mac-x64"
+        return None
 
-    def download_and_extract(self,url, download_path):
+    def download_and_extract(self, url, download_path):
         os.makedirs(download_path, exist_ok=True)
         zip_path = os.path.join(download_path, "download.zip")
-
 
         print(f"Downloading from {url} ...")
         with requests.get(url, stream=True) as r:
@@ -44,18 +39,21 @@ class WebdriverDownloader:
 
         with zipfile.ZipFile(zip_path, 'r') as zip_ref:
             zip_ref.extractall(download_path)
-
         os.remove(zip_path)
-        self.driver_path = os.path.join(download_path, BINARY_TYPE+'-'+self.platform_name)
 
+        self.driver_path = os.path.join(download_path, BINARY_TYPE + '-' + self.platform_name)
         with open(os.path.join(self.driver_path, "version.txt"), "w") as f:
             f.write(self.current_version)
-            f.close()
+
+        # Set executable permission if not on Windows
+        if self.platform_name != "win64":
+            executable_path = os.path.join(self.driver_path, BINARY_TYPE)
+            subprocess.run(["chmod", "+x", executable_path], check=True)
+
         print(f"Extracted to {self.driver_path}")
 
     def mainDownloader(self):
-
-        if self.platform_name is None:
+        if not self.platform_name:
             print("Unsupported platform")
             return
         print(f"Detected platform: {self.platform_name}")
@@ -65,7 +63,6 @@ class WebdriverDownloader:
 
         self.current_version = data["channels"]["Stable"]["version"]
         binaries = data["channels"]["Stable"]["downloads"][BINARY_TYPE]
-
         url = next((item["url"] for item in binaries if item["platform"] == self.platform_name), None)
 
         if not url:
@@ -73,28 +70,30 @@ class WebdriverDownloader:
             return
 
         final_path = os.path.join(DOWNLOAD_DIR)
-        if os.path.exists(final_path):
-            self.driver_path = os.path.join(final_path, BINARY_TYPE+'-'+self.platform_name)
-            with open(os.path.join(self.driver_path,'version.txt'), "r") as f:
+        existing_driver_path = os.path.join(final_path, BINARY_TYPE + '-' + self.platform_name)
+        version_file = os.path.join(existing_driver_path, "version.txt")
+
+        if os.path.exists(version_file):
+            with open(version_file, "r") as f:
                 if self.current_version == f.read().strip():
+                    self.driver_path = existing_driver_path
                     print(f"Driver already up to date: {self.current_version}")
                     return
-                else:                
-                    print(f"Removing old existing directory: {final_path}")
-                    shutil.rmtree(final_path)
-        self.download_and_extract(url, final_path)
-        print(f" {BINARY_TYPE} downloaded successfully.")
+            print(f"Removing old directory: {final_path}")
+            shutil.rmtree(final_path)
 
-                    
+        self.download_and_extract(url, final_path)
+        print(f"{BINARY_TYPE} downloaded successfully.")
+
     def get_driver(self):
-        if self.driver_path is None:
+        if not self.driver_path:
             raise Exception("Driver not downloaded yet.")
-        if self.platform_name == "win64":
-            return os.path.join(self.driver_path, BINARY_TYPE + ".exe")
-        return os.path.join(self.driver_path, BINARY_TYPE)
+        binary = BINARY_TYPE + ".exe" if self.platform_name == "win64" else BINARY_TYPE
+        return os.path.join(self.driver_path, binary)
 
 def get_driver():
     downloader = WebdriverDownloader()
     downloader.mainDownloader()
-    print(f'The downloaded driver is are {downloader.get_driver()}')
-    return downloader.get_driver()
+    driver_path = downloader.get_driver()
+    print(f"Driver path: {driver_path}")
+    return driver_path
