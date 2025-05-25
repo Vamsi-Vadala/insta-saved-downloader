@@ -57,6 +57,9 @@ class InstagramDownloader:
             driver = webdriver.Chrome(options=chrome_options, service=self.chrome_service)
         except Exception as e:
             print(f"Chrome driver crashed for {url} with error: {e}")
+            with open("../failed_urls.txt", "a") as f:
+                f.write(f"{url}\n")
+            print("The URL has been added to the failed URLs list.")
             return
         # driver.set_window_size(480, 256)
         driver.get(url)
