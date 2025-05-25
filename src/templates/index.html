@@ -8,57 +8,114 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <style>
     body {
-      background: linear-gradient(135deg, #368372, #383891);
-      color: #f0f0f0;
-      font-family: 'Orbitron', sans-serif;
-    }
+  background: linear-gradient(270deg, #1e1e2f, #2c3e50, #34495e, #1e1e2f);
+  background-size: 600% 600%;
+  animation: gradientFlow 10s ease infinite;
+  color: #f8f9fa;
+  font-family: 'Orbitron', sans-serif;
+}
+
+
     .form-control, .btn {
       border-radius: 8px;
     }
+
     .card {
-      background: linear-gradient(135deg,#383891, #368372);
-      border: 1px solid #333;
-      box-shadow: 0 0 10px #00f2ff55;
-    }
+  background: linear-gradient(180deg, #313866, #504099, #7067cf);
+  background-size: 400% 400%;
+  animation: gradientFlow 10s ease infinite;
+  color: #ffffff;
+  box-shadow: 0 0 18px rgba(100, 149, 237, 0.3);
+}
+
+
     .btn-primary {
-      background-color: #00f2ff;
-      border: none;
-    }
+  background: linear-gradient(180deg, #3a86ff, #00b4d8);
+  background-size: 400% 400%;
+  animation: gradientFlow 10s ease infinite;
+  color: #fff;
+  border: none;
+}
+
+
     .btn-primary:hover {
       background-color: #00aab3;
     }
+
     .form-control {
-      background-color: #8167beab;
-      color: #fff;
-      border: 1px solid #444;
-    }
-    .form-control:focus {
-      border-color: #00f2ff;
-      box-shadow: 0 0 5px #00f2ff;
-    }
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  border: 1px solid #555;
+}
+.form-control::placeholder {
+  color: #bbb;
+}
+.form-control:focus {
+  border-color: #00d4ff;
+  box-shadow: 0 0 5px #00d4ff;
+}
+
+
     .alert {
       border-radius: 6px;
     }
+
+    @keyframes gradientFlow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
   </style>
 </head>
+<script>
+  setTimeout(() => {
+    document.querySelectorAll('.alert').forEach(alert => {
+      alert.style.transition = 'opacity 0.5s ease-out';
+      alert.style.opacity = '0';
+      setTimeout(() => alert.remove(), 500);
+    });
+  }, 10000); // 10000 ms = 10 seconds
+</script>
 <body>
-  <div class="container d-flex justify-content-center align-items-center" style="height: 100vh">
-    <div class="card p-4 w-100" style="max-width: 500px;">
-      <h3 class="text-center mb-3">Instagram Video Downloader</h3>
-      <form method="post">
-        <input type="text" name="url" class="form-control mb-3" placeholder="Enter Instagram Post URL">
-        <button type="submit" class="btn btn-primary w-100">Download</button>
-      </form>
-      {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-          <div class="mt-3">
+  <div class="container py-5">
+    <div class="row justify-content-center g-4">
+
+      <!-- Single Post Download Card -->
+      <div class="col-md-6">
+        <div class="card p-4">
+          <h3 class="text-center mb-3">Instagram Video Downloader</h3>
+          <form method="post">
+            <input type="text" name="url" class="form-control mb-3" placeholder="Enter Instagram Post URL">
+            <button type="submit" name="action" value="download" class="btn btn-primary w-100">Download</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Playlist Download Card -->
+        <div class="col-md-6">
+        <div class="card p-4">
+            <h3 class="text-center mb-3">Playlist Downloader</h3>
+            <form method="post" enctype="multipart/form-data">
+            <input type="file" name="playlist_file" accept=".txt" class="form-control mb-3" required>
+            <button type="submit" name="action" value="playlist" class="btn btn-primary w-100">Download Playlist</button>
+            </form>
+        </div>
+        </div>
+
+
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="row justify-content-center mt-4">
+          <div class="col-md-8">
             {% for category, message in messages %}
               <div class="alert alert-{{ category }}">{{ message }}</div>
             {% endfor %}
           </div>
-        {% endif %}
-      {% endwith %}
-    </div>
+        </div>
+      {% endif %}
+    {% endwith %}
   </div>
 </body>
 </html>
