@@ -1,0 +1,14 @@
+#!/bin/bash
+cd "$(dirname "$0")/src"
+
+# Activate venv from root folder
+if [ -f "../.venv/bin/activate" ]; then
+  source ../.venv/bin/activate
+fi
+
+echo "🚀 InstaDownloader running at: http://localhost:5000"
+
+# Open in default browser
+xdg-open http://localhost:5000 &> /dev/null &
+
+python3 InstaWebDownload.py
