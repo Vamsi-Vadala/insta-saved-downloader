@@ -11,9 +11,11 @@ from tqdm import tqdm
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from loginHandler import InstaLoginHandler as Login
+import itertools
+from collections import defaultdict
 
 class InstagramDownloader:
-    def __init__(self, max_workers=10):
+    def __init__(self, max_workers=2):
         self.max_workers = max_workers
         self.no_video_url_count = 0
         self.lock = threading.Lock()
@@ -48,8 +50,15 @@ class InstagramDownloader:
     def _extract_video_urls(self, url):
         chrome_options = Options()
         chrome_options.add_argument("--headless=new")
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.set_capability("goog:loggingPrefs", {"performance": "ALL"})
-        driver = webdriver.Chrome(options=chrome_options, service=self.chrome_service)
+        try:
+            driver = webdriver.Chrome(options=chrome_options, service=self.chrome_service)
+        except Exception as e:
+            print(f"Chrome driver crashed for {url} with error: {e}")
+            return
+        # driver.set_window_size(480, 256)
         driver.get(url)
         for cookie in self.insta_cookies:
             driver.add_cookie(cookie)
@@ -89,27 +98,27 @@ class InstagramDownloader:
 
             title = self._extract_title(url)
             if best_video_url and not audio_only:
-                urllib.request.urlretrieve(best_video_url, f"{title}.mp4", self._update_progress)
+                urllib.request.urlretrieve(best_video_url, f"../videos/{title}.mp4", self._update_progress)
             if best_audio_url and not video_only:
-                urllib.request.urlretrieve(best_audio_url, f"{title}.mp3", self._update_progress)
+                urllib.request.urlretrieve(best_audio_url, f"../videos/{title}.mp3", self._update_progress)
             self.merge(title)
         except Exception as e:
             print(f"Error processing {url}: {e}")
 
     def threaded_download(self, urls, video_only=False, audio_only=False):
-        full_urls = ["https://www.instagram.com/p/" + u for u in urls]
         with concurrent.futures.ThreadPoolExecutor(max_workers=self.max_workers) as executor:
-            executor.map(self.download, full_urls, [video_only]*len(full_urls), [audio_only]*len(full_urls))
+            executor.map(self.download, urls, itertools.repeat(video_only), itertools.repeat(audio_only))
+
 
     def _list_media_files(self):
-        files = os.listdir("./")
+        files = os.listdir("../videos/")
         videos = {f[:-4] for f in files if f.endswith(".mp4")}
         audios = {f[:-4] for f in files if f.endswith(".mp3")}
         return videos & audios
 
     def merge(self, title):
         try:
-            v_file, a_file, out_file = f"{title}.mp4", f"{title}.mp3", f"{title}_converted.mp4"
+            v_file, a_file, out_file = f"../videos/{title}.mp4", f"../videos/{title}.mp3", f"../videos/{title}_converted.mp4"
             if not os.path.exists(v_file) or not os.path.exists(a_file):
                 raise FileNotFoundError(f"Missing files for {title}")
             (
@@ -123,12 +132,6 @@ class InstagramDownloader:
                 print(f"Merged and cleaned: {title}")
         except Exception as e:
             print(f"Error merging {title}: {e}")
-
-    def mass_download(self):
-        with open('savedVideosLinks.txt', 'r') as f:
-            urls = [line.strip() for line in f if line.strip()]
-        self.threaded_download(urls)
-        print(f"Total failed downloads: {self.no_video_url_count}")
 
     def mass_merge(self):
         titles = self._list_media_files()
