@@ -1,0 +1,8 @@
+Flask>=3.1.1
+waitress>=3.0.2
+selenium>=4.31.0
+beautifulsoup4>=4.13.4
+requests>=2.32.3
+ffmpeg-python>=0.2.0
+tqdm>=4.67.1
+progressbar>=2.5
