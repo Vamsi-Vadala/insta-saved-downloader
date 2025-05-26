@@ -28,6 +28,8 @@ Insta Saved Downloader helps you **batch download saved Instagram videos** from 
 
 ### 🔧 Step-by-Step
 
+**Note: I forgot to code the part which extracts username. So for now use the Global Variable from the `src/loginHandler.py` and set it to your username**
+
 1. **Give execute permission to the launcher**
 
 ```bash
