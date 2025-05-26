@@ -6,7 +6,7 @@ import time
 import pickle
 import os
 
-USER_NAME = 'vamsi._.vadala'
+USER_NAME = 'your_username_here'  # Replace with your Instagram username
 
 class InstaLoginHandler:
 
