@@ -10,4 +10,4 @@ REM Open in default browser
 start http://localhost:5000
 
 REM Run the Flask app using waitress
-python InstaWebDownloader.py
+python InstaWebDownload.py

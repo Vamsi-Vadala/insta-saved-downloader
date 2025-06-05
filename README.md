@@ -65,7 +65,7 @@ project/
 ├── requirements.txt
 ├── README.md
 ├── src/
-│   ├── InstaWebDownloader.py
+│   ├── InstaWebDownload.py
 │   └── templates/
 │       └── index.html
 └── savedVideosLinks.txt
