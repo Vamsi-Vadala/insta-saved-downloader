@@ -52,7 +52,7 @@ chmod +x launch_app
 
 ## 🪟 For Windows
 
-Still in Development stage. Your are welcome to try the raw code for windows but you have to install all the required dependies youself.
+Run the `launch_app.bat`
 
 ---
 
